@@ -52,17 +52,17 @@
   </ciManagement>
   <modules>
     <!-- Removing unnecessary modules isw2-->
-    <!--
+
     <module>buildtools</module>
     <module>circe-checksum</module>
     <module>bookkeeper-common</module>
     <module>bookkeeper-common-allocator</module>
     <module>stats</module>
     <module>bookkeeper-proto</module>
-    -->
+
     <module>bookkeeper-server</module>
     <module>tests</module>
-    <!--
+
     <module>bookkeeper-benchmark</module>
     <module>bookkeeper-http</module>
     <module>stream</module>
@@ -75,7 +75,7 @@
     <module>bookkeeper-slogger</module>
     <module>native-io</module>
     <module>testtools</module>
-    -->
+
   </modules>
   <mailingLists>
     <mailingList>
