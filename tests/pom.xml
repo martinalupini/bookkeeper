@@ -19,6 +19,7 @@
 
 
   <dependencies>
+    <!-- Removing unnecessary dependencies
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>bookkeeper-benchmark</artifactId>
@@ -39,11 +40,13 @@
       <artifactId>bookkeeper-proto</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
+    -->
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>bookkeeper-server</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
+    <!--
     <dependency>
       <groupId>${project.parent.groupId}</groupId>
       <artifactId>circe-checksum</artifactId>
@@ -179,9 +182,30 @@
       <artifactId>stream-storage-cli</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
+    -->
   </dependencies>
 
+
+  <!--JacocoCoverage isw2-->
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>report</id>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!--build>
     <plugins>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -198,7 +222,7 @@
         </executions>
       </plugin>
     </plugins>
-  </build>
+  </build-->
 
 
 </project>
