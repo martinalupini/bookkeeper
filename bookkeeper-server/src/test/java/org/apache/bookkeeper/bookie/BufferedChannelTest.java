@@ -43,7 +43,7 @@ public class BufferedChannelTest {
 
     }
 
-    /*
+
     @Test
     public void testWriteAndRead() throws IOException {
         // Write data to the channel
@@ -69,6 +69,7 @@ public class BufferedChannelTest {
         assertEquals(new String(readData), new String(readData));
     }
 
+    /*
     @Test
     public void testForceWrite() throws IOException {
         // Write data to the channel
