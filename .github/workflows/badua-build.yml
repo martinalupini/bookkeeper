@@ -29,9 +29,9 @@ jobs:
           git clone https://github.com/saeg/ba-dua
           cd ba-dua
           git checkout d2401f0
+          mvn -v
+          java -version
           mvn clean install
-          echo mvn -v
-          echo java -version
           cd ..
       - name: Build and analyze bookkeeper project
         env:
