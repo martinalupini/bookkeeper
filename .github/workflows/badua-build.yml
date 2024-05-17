@@ -30,13 +30,15 @@ jobs:
           cd ba-dua
           git checkout d2401f0
           mvn clean install
+          echo mvn -v
+          echo java -version
           cd ..
       - name: Build and analyze bookkeeper project
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         run: mvn clean verify -P BaduaCoverage
       - name: Upload report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: BaDuaCoverage_Report
           path: bookkeeper-server/target/badua.xml
