@@ -1380,9 +1380,6 @@
       <id>JacocoCoverage</id>
       <activation>
         <activeByDefault>false</activeByDefault>
-        <!--property>
-          <name>!skipCoverage</name>
-        </property-->
       </activation>
       <build>
         <plugins>
