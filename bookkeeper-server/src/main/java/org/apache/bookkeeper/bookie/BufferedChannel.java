@@ -328,4 +328,9 @@ public class BufferedChannel extends BufferedReadChannel implements Closeable {
     public long getUnpersistedBytesBound(){
         return unpersistedBytesBound;
     }
+
+    @VisibleForTesting
+    public ByteBuf getWriteBuffer(){
+        return writeBuffer;
+    }
 }
