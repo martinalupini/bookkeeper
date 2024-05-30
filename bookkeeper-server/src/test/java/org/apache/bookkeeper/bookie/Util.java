@@ -49,28 +49,4 @@ public class Util {
         return fc;
     }
 
-    public static class BuffChannSpecific{
-        private BufferedChannel bufferedChannel;
-        private boolean invalidAlloc;
-        private boolean invalidFC;
-
-        BuffChannSpecific(BufferedChannel bufferedChannel, boolean invalidAlloc, boolean invalidFC) {
-            this.bufferedChannel = bufferedChannel;
-            this.invalidAlloc = invalidAlloc;
-            this.invalidFC = invalidFC;
-        }
-
-        public BufferedChannel getBufferedChannel() {
-            return bufferedChannel;
-        }
-
-        public boolean isInvalidAlloc() {
-            return invalidAlloc;
-        }
-
-        public boolean isInvalidFC() {
-            return invalidFC;
-        }
-
-    }
 }

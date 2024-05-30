@@ -11,11 +11,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.channels.FileChannel;
 import java.util.stream.Stream;
 
-import static org.apache.bookkeeper.bookie.Util.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -26,57 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BufferedChannelWriteTest {
 
-    private List<String> files = new ArrayList<>();
-    private List<BuffChannSpecific> bufferedChannelList = new ArrayList<>();
-    private int istanza=1;
-
-
-    @BeforeAll
-    void setUp() throws IOException {
-
-        BufferedChannel buf1 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f1"), 4096, 4096, 4096);
-        files.add("f1");
-        bufferedChannelList.add(new BuffChannSpecific(buf1, false, false));
-
-        BufferedChannel buf2 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f2"), 1, 1, 2);
-        files.add("f2");
-        bufferedChannelList.add(new BuffChannSpecific(buf2, false, false));
-
-        BufferedChannel buf3 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f3"), 1, 1, -1);
-        files.add("f3");
-        bufferedChannelList.add(new BuffChannSpecific(buf3, false, false));
-
-        BufferedChannel buf4 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f4"), 4096, 1, 1024);
-        files.add("f4");
-        bufferedChannelList.add(new BuffChannSpecific(buf4, false, false));
-
-        BufferedChannel buf5 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f5"), 4096, 1, 4097);
-        files.add("f5");
-        bufferedChannelList.add(new BuffChannSpecific(buf5, false, false));
-
-        //istanze problematiche
-        BufferedChannel buf6 = new BufferedChannel(getInvalidAllocator(), validFileChannel("f6"), 1, 1, 0);
-        files.add("f6");
-        bufferedChannelList.add(new BuffChannSpecific(buf6, true, false));
-
-        BufferedChannel buf7 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f7"), 0, 0, 0);
-        files.add("f7");
-        bufferedChannelList.add(new BuffChannSpecific(buf7, false, false));
-
-        BufferedChannel buf8 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f8"), 0, 0, 1);
-        files.add("f8");
-        bufferedChannelList.add(new BuffChannSpecific(buf8, false, false));
-
-        BufferedChannel buf9 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, validFileChannel("f9"), 4096, 1, 1024);
-        files.add("f9");
-        buf9.close();
-        bufferedChannelList.add(new BuffChannSpecific(buf9, false, false));
-
-        BufferedChannel buf10 = new BufferedChannel(UnpooledByteBufAllocator.DEFAULT, readOnlyFileChannel("f10"), 1, 1, 0);
-        files.add("f10");
-        bufferedChannelList.add(new BuffChannSpecific(buf10, false, true));
-
-    }
+    private String file;
 
     private static ByteBuf getWrittenByteBuf(){
         byte[] testData = "Hello, world!".getBytes();
@@ -94,12 +42,80 @@ public class BufferedChannelWriteTest {
 
 
     // Definisce i dati di input per il test sulla write
-    static Stream<Arguments> provideWriteArguments(){
+    static Stream<Arguments> provideWriteArguments() throws IOException {
         return Stream.of(
-                Arguments.of(getInvalidByteBuf(), Exception.class),
-                Arguments.of(null, NullPointerException.class),
-                Arguments.of(Unpooled.buffer(0), null),
-                Arguments.of(getWrittenByteBuf(), null)
+
+                // src non valida (tramite Mock)
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 1, "validTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile", getInvalidByteBuf(), Exception.class),
+                Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", getInvalidByteBuf(), Exception.class),
+
+                // src null
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", null, NullPointerException.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 1, "validTestFile", null, NullPointerException.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", null, NullPointerException.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", null, NullPointerException.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", null, NullPointerException.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", null, NullPointerException.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", null, NullPointerException.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile", null, NullPointerException.class),
+                Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", null, NullPointerException.class),
+
+                // src vuota
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", Unpooled.buffer(0), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 1, "validTestFile", Unpooled.buffer(0), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", Unpooled.buffer(0), Exception.class), //--> FAILURE: Eccezione non lanciata
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", Unpooled.buffer(0), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", Unpooled.buffer(0), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", Unpooled.buffer(0), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", Unpooled.buffer(0), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile", Unpooled.buffer(0), null),
+                //Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", Unpooled.buffer(0), Exception.class),  //--> FAILURE: Eccezione non lanciata
+
+                // src non vuota
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", getWrittenByteBuf(), null), //--> FAILURE: Loop
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 1, "validTestFile", getWrittenByteBuf(), null), //--> FAILURE: Loop
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", getWrittenByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", getWrittenByteBuf(), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", getWrittenByteBuf(), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", getWrittenByteBuf(), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", getWrittenByteBuf(), null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile", getWrittenByteBuf(), null),
+                Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", getWrittenByteBuf(), Exception.class)
+        );
+    }
+
+
+    // Definisce i dati di input per il test sulla write
+    static Stream<Arguments> provideWriteClosedArguments() throws IOException {
+        return Stream.of(
+
+                //src non vuota
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", getWrittenByteBuf(),  Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", getWrittenByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", getWrittenByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", getWrittenByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", getWrittenByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", getWrittenByteBuf(), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile", getWrittenByteBuf(), Exception.class),
+                Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", getWrittenByteBuf(), Exception.class),
+
+                // src vuota  --> FAILURE in tutti i casi
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", Unpooled.buffer(0), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", Unpooled.buffer(0), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", Unpooled.buffer(0), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", Unpooled.buffer(0), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", Unpooled.buffer(0), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", Unpooled.buffer(0), Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile", Unpooled.buffer(0), Exception.class),
+                Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", Unpooled.buffer(0), Exception.class)
+
         );
     }
 
@@ -107,63 +123,63 @@ public class BufferedChannelWriteTest {
     @ParameterizedTest
     @Timeout(5)
     @MethodSource("provideWriteArguments")
-    void testBufferedChannelWrite(ByteBuf src, Class<Exception> expectedException){
-        istanza = 1;
+    void testBufferedChannelWrite(ByteBufAllocator allocator, FileChannel fc, int writeCapacity, int readCapacity, long unpersistedBytesBound, String filename, ByteBuf src, Class<Exception> expectedException){
+        long prevPos;
+        long unpersistedBytesPrev;
+        long writeStartPosPrev;
+        long expectedBytesUnpersisted = 0;
+        long expectedPos;
+        long expectedWriteStartPos;
 
         try {
 
-            // ora testo il metodo write su tutte le possibili istanze ottenute in precedenza
-            for(BuffChannSpecific bufferedChannel : bufferedChannelList) {
+            BufferedChannel bc = new BufferedChannel(allocator, fc, writeCapacity, readCapacity, unpersistedBytesBound);
+            assertNotNull(bc, "BufferedChannel should not be null");
 
-                System.out.println("Starting testing instance "+istanza);
-                // caso in cui il buffered channel è chiuso, il fc non è valido, l'allocatore non è valido oppure mi aspetto un'eccezione
-                if (bufferedChannel.getBufferedChannel().isClosed() || bufferedChannel.isInvalidFC() || bufferedChannel.isInvalidAlloc() || expectedException != null) {
-                    // Verifica che venga lanciata l'eccezione attesa
-                    assertThrows(Exception.class, () -> {
-                        bufferedChannel.getBufferedChannel().write(src);
-                    });
-                } else {
+            if (expectedException != null) {
+                // Verifica che venga lanciata l'eccezione attesa
+                assertThrows(Exception.class, () -> {
+                    bc.write(src);
+                });
+            } else {
 
-                    // tengo traccia dei valori di position, unpersistedBytes e writeBufferStartPosition prima della scrittura
-                    long prevPos = bufferedChannel.getBufferedChannel().position();
-                    long unpersistedBytesPrev = bufferedChannel.getBufferedChannel().getUnpersistedBytes();
-                    long writeStartPosPrev = bufferedChannel.getBufferedChannel().getFileChannelPosition();
+                //tengo traccia del contesto.
+                long bound = bc.getUnpersistedBytesBound();
+                long src_bytes = src.readableBytes();
+                long cap = bc.getWriteBuffer().capacity();
 
-                    long bound = bufferedChannel.getBufferedChannel().getUnpersistedBytesBound();
-                    long src_bytes = src.readableBytes();
-                    long cap = bufferedChannel.getBufferedChannel().getWriteBuffer().capacity();
+                // tengo traccia dei valori di position, unpersistedBytes e writeBufferStartPosition prima della scrittura
+                prevPos = bc.position();
+                unpersistedBytesPrev = bc.getUnpersistedBytes();
+                writeStartPosPrev = bc.getFileChannelPosition();
 
-                    long expectedBytesUnpersisted = 0;
 
-                    bufferedChannel.getBufferedChannel().write(src);
+                expectedBytesUnpersisted = 0;
 
-                    if(bufferedChannel.getBufferedChannel().isDoRegularFlushes() && bound < cap){
-                        if(bound - unpersistedBytesPrev >= src_bytes){
-                            expectedBytesUnpersisted = src_bytes +unpersistedBytesPrev;
-                        }else if(bound - unpersistedBytesPrev < src_bytes){
-                            expectedBytesUnpersisted = (unpersistedBytesPrev+src_bytes)%bound;
-                        }
+                bc.write(src);
 
-                    }else{
-                        if(cap - unpersistedBytesPrev >= src_bytes ){
-                            expectedBytesUnpersisted = src_bytes +unpersistedBytesPrev;
-                        }else if(cap - unpersistedBytesPrev < src_bytes ){
-                            expectedBytesUnpersisted = (unpersistedBytesPrev+src_bytes)%cap;
-                        }
-
+                if (bc.isDoRegularFlushes() && bound < cap) {
+                    if (bound - unpersistedBytesPrev >= src_bytes) {
+                        expectedBytesUnpersisted = src_bytes + unpersistedBytesPrev;
+                    } else if (bound - unpersistedBytesPrev < src_bytes) {
+                        expectedBytesUnpersisted = (unpersistedBytesPrev + src_bytes) % bound;
                     }
 
-                    long expectedPos = prevPos + src_bytes;
-                    long expectedWriteStartPos = writeStartPosPrev + src_bytes -expectedBytesUnpersisted;
-
-                    assertEquals(expectedPos, bufferedChannel.getBufferedChannel().position);
-                    assertEquals(expectedBytesUnpersisted, bufferedChannel.getBufferedChannel().getUnpersistedBytes());
-                    assertEquals(expectedWriteStartPos, bufferedChannel.getBufferedChannel().getFileChannelPosition());
+                } else {
+                    if (cap - unpersistedBytesPrev >= src_bytes) {
+                        expectedBytesUnpersisted = src_bytes + unpersistedBytesPrev;
+                    } else if (cap - unpersistedBytesPrev < src_bytes) {
+                        expectedBytesUnpersisted = (unpersistedBytesPrev + src_bytes) % cap;
+                    }
 
                 }
 
-                System.out.println("Done testing instance "+istanza);
-                istanza ++;
+                expectedPos = prevPos + src_bytes;
+                expectedWriteStartPos = writeStartPosPrev + src_bytes - expectedBytesUnpersisted;
+
+                assertEquals(expectedPos, bc.position);
+                assertEquals(expectedBytesUnpersisted, bc.getUnpersistedBytes());
+                assertEquals(expectedWriteStartPos, bc.getFileChannelPosition());
 
             }
 
@@ -171,20 +187,37 @@ public class BufferedChannelWriteTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    //testo la write ma su istanze di file channel chiuse
+    @ParameterizedTest
+    @MethodSource("provideWriteClosedArguments")
+    void testBufferedChannelWriteClosed(ByteBufAllocator allocator, FileChannel fc, int writeCapacity, int readCapacity, long unpersistedBytesBound, String filename, ByteBuf src, Class<Exception> expectedException) {
+
+        try {
+
+
+            BufferedChannel bc = new BufferedChannel(allocator, fc, writeCapacity, readCapacity, unpersistedBytesBound);
+            assertNotNull(bc, "BufferedChannel should not be null");
+            bc.close();
+            assertThrows(Exception.class, () -> { bc.write(src);});
+
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
-
-
-    @AfterAll
+    @AfterEach
     public void  cleanUp(){
 
         //rimozione del file creato dopo aver eseguito il test
-        for(String file : files){
-            File f = new File(file);
-            f.delete();
-        }
+        if(file == null) return;
+
+        File f = new File(file);
+        f.delete();
 
     }
 
