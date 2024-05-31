@@ -3,7 +3,9 @@ package org.apache.bookkeeper.bookie;
 import io.netty.buffer.ByteBufAllocator;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,27 +27,43 @@ public class Util {
 
     public static FileChannel readOnlyFileChannel(String name) throws IOException {
         Path path = Paths.get(name);
-        if (!Files.exists(path)) {
-            Files.createFile(path);
+        if (Files.exists(path)) {
+            Files.delete(path);
         }
+        Files.createFile(path);
         return FileChannel.open(path, StandardOpenOption.READ);
     }
 
     public static FileChannel validFileChannel(String name) throws IOException {
         Path path = Paths.get(name);
-        if (!Files.exists(path)) {
-            Files.createFile(path);
+        if (Files.exists(path)) {
+            Files.delete(path);
         }
+        Files.createFile(path);
         return FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
     }
 
     public static FileChannel closedFileChannel(String name) throws IOException {
         Path path = Paths.get(name);
-        if (!Files.exists(path)) {
-            Files.createFile(path);
+        if (Files.exists(path)) {
+            Files.delete(path);
         }
+        Files.createFile(path);
         FileChannel fc = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
         fc.close();
+        return fc;
+    }
+
+    public static FileChannel writtenFileChannel(String name) throws IOException {
+        Path path = Paths.get(name);
+        if (Files.exists(path)) {
+            Files.delete(path);
+        }
+        Files.createFile(path);
+
+        ByteBuffer buff = ByteBuffer.wrap("Just some content".getBytes(StandardCharsets.UTF_8));
+        FileChannel fc = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
+        fc.write(buff);
         return fc;
     }
 
