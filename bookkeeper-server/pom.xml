@@ -243,6 +243,13 @@
       <artifactId>awaitility</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!--dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest-maven</artifactId>
+      <version>${pitest.version}</version>
+      <type>maven-plugin</type>
+    </dependency-->
   </dependencies>
   <build>
     <plugins>
@@ -458,7 +465,8 @@
       </build>
     </profile>
 
-    <!-- PIT profile -->
+
+    <!-- PIT profile isw2-->
     <profile>
       <id>PitMutationTesting</id>
       <activation>
@@ -473,13 +481,21 @@
           <plugin>
             <groupId>org.pitest</groupId>
             <artifactId>pitest-maven</artifactId>
-            <version>${pitest.version}</version>
+            <version>1.14.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-junit5-plugin</artifactId>
+                <version>1.2.0</version>
+              </dependency>
+            </dependencies>
             <configuration>
               <targetClasses>
                 <param>org.apache.bookkeeper.bookie.BufferedChannel</param>
               </targetClasses>
               <targetTests>
                 <param>org.apache.bookkeeper.bookie.BufferedChannelTest</param>
+                <param>org.apache.bookkeeper.bookie.BufferedChannelWriteTest</param>
               </targetTests>
               <avoidCallsTo>
                 <avoidCallsTo>org.slf4j</avoidCallsTo>
@@ -500,6 +516,5 @@
         </plugins>
       </build>
     </profile>
-
   </profiles>
 </project>

@@ -157,7 +157,8 @@
     <jsoup.version>1.15.3</jsoup.version>
     <junit.version>4.13.2</junit.version>
     <hamcrest.version>1.3</hamcrest.version>
-    <junit5.version>5.10.2</junit5.version>
+    <!-- Changed junit from 5.10.2 to 5.9.2 -->
+    <junit5.version>5.9.2</junit5.version>
     <assertj-core.version>3.25.3</assertj-core.version>
     <awaitility.version>4.2.0</awaitility.version>
     <libthrift.version>0.14.2</libthrift.version>
