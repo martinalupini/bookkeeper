@@ -11,9 +11,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.stream.Stream;
-
+import static org.apache.bookkeeper.bookie.Util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 
 // Indica che una singola istanza della classe di test verrà utilizzata per tutti i metodi di test
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -25,22 +26,24 @@ public class BufferedChannelTest {
     static Stream<Arguments> provideConstructorArguments() {
         try {
             return Stream.of(
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), -1, 1, 0, "validTestFile", Exception.class),  // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, -1, 0, "validTestFile", Exception.class),  // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", null),    // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 0, 0, 1, "validTestFile", null),    // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), -1, 1, 0, "validTestFile", Exception.class),  // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 1, -1, 0, "validTestFile", Exception.class),  // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 0, 0, 0, "validTestFile", null),    // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 0, 0, 1, "validTestFile", null),    // --> PASS
                     //Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", Exception.class),  // --> FAIL: Exception not thrown
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", null),
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.closedFileChannel("closedTestFile"), 1, 1, 0, "closedTestFile",Exception.class), // --> PASS: ClosedChannelException
-                    Arguments.of(null, Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", NullPointerException.class),  // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, readOnlyFileChannel("invalidTestFile"), 1, 1, 0, "invalidTestFile", null),
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, closedFileChannel("closedTestFile"), 1, 1, 0, "closedTestFile",Exception.class), // --> PASS: ClosedChannelException
+                    Arguments.of(null, validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", NullPointerException.class),  // --> PASS
                     Arguments.of(UnpooledByteBufAllocator.DEFAULT, null, 1, 1, 0, null, NullPointerException.class),  // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", null),   // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", null),    // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", null),   // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", null),  // --> PASS
-                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, Util.validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile",null),   // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 4096, "validTestFile", null),   // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 1, 1, 2, "validTestFile", null),    // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 1, 1, -1, "validTestFile", null),   // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", null),  // --> PASS
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile",null),   // --> PASS
                     //Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", Exception.class)  // --> FAIL: Exception not thrown
-                    Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile",null)
+                    Arguments.of(getInvalidAllocator(), validFileChannel("validTestFile"), 1, 1, 0, "validTestFile",null),
+                    // Aggiunta dopo report PIT
+                    Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 4096, 1, 1024, "writteTestFile", null)
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -69,7 +72,7 @@ public class BufferedChannelTest {
                 assertEquals(writeCapacity, bufferedChannel.getWriteCapacity());
                 assertEquals(readCapacity, bufferedChannel.getReadCapacity());
                 assertEquals(unpersistedBytesBound, bufferedChannel.getUnpersistedBytesBound());
-                assertEquals(0, bufferedChannel.getFileChannelPosition());
+                assertEquals(fc.position(), bufferedChannel.getFileChannelPosition());
                 assertEquals(Long.MIN_VALUE, bufferedChannel.getReadBufferStartPosition());
                 assertEquals(0, bufferedChannel.getUnpersistedBytes());
                 if(unpersistedBytesBound > 0) {
@@ -78,7 +81,7 @@ public class BufferedChannelTest {
                     assertFalse(bufferedChannel.isDoRegularFlushes());
                 }
                 assertFalse(bufferedChannel.isClosed());
-                assertEquals(0, bufferedChannel.position());
+                assertEquals(bufferedChannel.getFileChannelPosition(), bufferedChannel.position());
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
