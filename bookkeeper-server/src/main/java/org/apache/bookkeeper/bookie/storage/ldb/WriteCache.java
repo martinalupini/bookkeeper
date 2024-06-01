@@ -22,6 +22,7 @@ package org.apache.bookkeeper.bookie.storage.ldb;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -37,6 +38,8 @@ import org.apache.bookkeeper.util.collections.ConcurrentLongLongPairHashMap;
 import org.apache.bookkeeper.util.collections.ConcurrentLongLongPairHashMap.LongPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
  * Write cache implementation.
@@ -308,4 +311,25 @@ public class WriteCache implements Closeable {
     private int sortedEntriesIdx;
 
     private static final Logger log = LoggerFactory.getLogger(WriteCache.class);
+
+
+    @VisibleForTesting
+    public long getMaxCacheSize() {
+        return maxCacheSize;
+    }
+
+    @VisibleForTesting
+    public int getMaxSegmentSize(){
+        return maxSegmentSize;
+    }
+
+    @VisibleForTesting
+    public int getSegmentsCount(){
+        return segmentsCount;
+    }
+
+    @VisibleForTesting
+    public long getCacheOffset(){
+        return cacheOffset.get();
+    }
 }

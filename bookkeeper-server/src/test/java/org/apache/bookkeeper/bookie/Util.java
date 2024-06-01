@@ -1,5 +1,6 @@
 package org.apache.bookkeeper.bookie;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
 import java.io.IOException;
@@ -66,5 +67,21 @@ public class Util {
         fc.write(buff);
         return fc;
     }
+
+    public static ByteBuf getWrittenByteBuf(){
+        byte[] testData = "Hello, world!".getBytes();
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
+        byteBuf.writeBytes(testData);
+
+        return byteBuf;
+    }
+
+    public static ByteBuf getInvalidByteBuf(){
+        ByteBuf buf = mock(ByteBuf.class);
+        when(buf.readableBytes()).thenReturn(1);
+        when(buf.readerIndex()).thenReturn(-1);
+        return buf;
+    }
+
 
 }

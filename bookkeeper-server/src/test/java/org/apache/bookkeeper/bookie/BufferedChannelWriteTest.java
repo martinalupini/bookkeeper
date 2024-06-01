@@ -30,20 +30,6 @@ public class BufferedChannelWriteTest {
 
     private String file;
 
-    private static ByteBuf getWrittenByteBuf(){
-        byte[] testData = "Hello, world!".getBytes();
-        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
-        byteBuf.writeBytes(testData);
-        return byteBuf;
-    }
-
-    private static ByteBuf getInvalidByteBuf(){
-        ByteBuf buf = mock(ByteBuf.class);
-        when(buf.readableBytes()).thenReturn(1);
-        when(buf.readerIndex()).thenReturn(-1);
-        return buf;
-    }
-
 
     // Definisce i dati di input per il test sulla write
     static Stream<Arguments> provideWriteArguments() throws IOException {
