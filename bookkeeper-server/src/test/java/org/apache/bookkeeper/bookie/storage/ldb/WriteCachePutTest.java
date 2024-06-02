@@ -1,9 +1,9 @@
-package org.apache.bookkeeper.bookie;
+package org.apache.bookkeeper.bookie.storage.ldb;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import org.apache.bookkeeper.bookie.storage.ldb.WriteCache;
+import org.apache.bookkeeper.bookie.Concurrency;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -18,8 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WriteCachePutTest {
-
-    private static final int ALIGN_64_MASK = ~(64 - 1);
 
     static Stream<Arguments> providePutArguments() {
         return Stream.of(
@@ -48,8 +46,14 @@ public class WriteCachePutTest {
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 1024, 0, 0, getWrittenByteBuf(), true,null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 512, 0, 0, getWrittenByteBuf(), true, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1, 1, 0, 0, getWrittenByteBuf(), false, null),
-                // after Jacoco report -------------------------------------------------------
+                // Dopo report Jacoco -------------------------------------------------------
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 4, 0, 0, getWrittenByteBuf(), false, null),
+                // Dopo report PIT
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 64, 4, 0, 0, getWrittenByteBuf(), false, null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 51, 4, 0, 0, getWrittenByteBuf(), false, null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 64, 0, 0, getByteBuf("12345678123456781234567812345678123456781234567812345678123456789"), false, null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 4, 0, 0, getByteBuf("1234567"), false, null),
+
 
                 // entry non valida
                 //Arguments.of(UnpooledByteBufAllocator.DEFAULT, 0, 1, 1, 1, getInvalidByteBuf(), false, Exception.class),  //--> FAILURE: no exception thrown
@@ -86,6 +90,7 @@ public class WriteCachePutTest {
 
             long prevSize = writeCache.size();
             long prevCount = writeCache.count();
+
             long expectedCacheSize;
             long expectedCacheCount;
 
@@ -97,6 +102,7 @@ public class WriteCachePutTest {
             if(!expectedResult){
                 expectedCacheCount = prevCount;
                 expectedCacheSize = prevSize;
+
             }else{
                 expectedCacheSize = prevSize+entry.readableBytes();
                 expectedCacheCount = prevCount+1;
@@ -109,7 +115,6 @@ public class WriteCachePutTest {
 
             Assert.assertEquals("Expected cacheSize check failed",expectedCacheSize, writeCache.size());
             Assert.assertEquals("Expected cacheCount check failed",expectedCacheCount, writeCache.count());
-
         }
     }
 
@@ -119,13 +124,6 @@ public class WriteCachePutTest {
 
         ByteBuf buf = getWrittenByteBuf();
         ByteBuf bufNewer = getWrittenByteBuf();
-        //ByteBuf bufSuperior = getWrittenByteBuf();
-        /*
-        byte[] testData = "Hello!".getBytes();
-        ByteBuf bufSuperior = ByteBufAllocator.DEFAULT.buffer();
-        bufSuperior.writeBytes(testData);
-
-         */
 
         // lancio un thread che inserisce nel ledger con ID 0 l'entry con ID 3
         Concurrency concurrency = new Concurrency(writeCache, bufNewer);
@@ -144,15 +142,6 @@ public class WriteCachePutTest {
         Assert.assertEquals("Expected entry check failed",buf, writeCache.get(0, 0));
         Assert.assertEquals("Expected last entry check failed",bufNewer, writeCache.getLastEntry(0));
 
-        // ora aggiungo l'entry (0,5).
-        /*
-        result = writeCache.put(1,5,bufSuperior);
-        assertTrue(result);
-        Assert.assertEquals("Expected entry check failed",bufSuperior, writeCache.get(0, 5));
-        // mi aspetto che sia l'ultima entry del rispettivo ledger
-        Assert.assertEquals("Expected last entry check failed",bufSuperior, writeCache.getLastEntry(0));
-         */
-
     }
 
 
@@ -161,9 +150,7 @@ public class WriteCachePutTest {
 
         WriteCache writeCache = new WriteCache(UnpooledByteBufAllocator.DEFAULT, 1024, 64);
 
-        byte[] testData = "123456712345671234567123456712345671234567123456712345671234567".getBytes();
-        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
-        byteBuf.writeBytes(testData);
+        ByteBuf byteBuf = getByteBuf("123456712345671234567123456712345671234567123456712345671234567");
 
         boolean result = writeCache.put(0,0,byteBuf);
         assertTrue(result);
@@ -188,6 +175,11 @@ public class WriteCachePutTest {
     }
 
 
+    private static final int ALIGN_64_MASK = ~(64 - 1);
+
+    static int align64(int size) {
+        return (size + 64 - 1) & ALIGN_64_MASK;
+    }
 }
 
 
