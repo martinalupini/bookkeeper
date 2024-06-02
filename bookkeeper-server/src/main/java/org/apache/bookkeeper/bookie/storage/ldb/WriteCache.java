@@ -39,8 +39,6 @@ import org.apache.bookkeeper.util.collections.ConcurrentLongLongPairHashMap.Long
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 /**
  * Write cache implementation.
  *
@@ -319,17 +317,38 @@ public class WriteCache implements Closeable {
     }
 
     @VisibleForTesting
-    public int getMaxSegmentSize(){
+    public int getMaxSegmentSize() {
         return maxSegmentSize;
     }
 
     @VisibleForTesting
-    public int getSegmentsCount(){
+    public int getSegmentsCount() {
         return segmentsCount;
     }
 
     @VisibleForTesting
-    public long getCacheOffset(){
+    public long getCacheOffset() {
         return cacheOffset.get();
     }
+
+    @VisibleForTesting
+    public long getSegmentOffsetMask() {
+        return segmentOffsetMask;
+    }
+
+    @VisibleForTesting
+    public long getSegmentOffsetBits() {
+        return segmentOffsetBits;
+    }
+
+    @VisibleForTesting
+    public int getCacheSegmentCapacity(int index) {
+        return cacheSegments[index].capacity();
+    }
+
+    @VisibleForTesting
+    public int getCacheSegmentsLength(){
+        return cacheSegments.length;
+    }
+
 }

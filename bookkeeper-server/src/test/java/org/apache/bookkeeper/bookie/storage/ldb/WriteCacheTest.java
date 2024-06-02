@@ -1,8 +1,8 @@
-package org.apache.bookkeeper.bookie;
+package org.apache.bookkeeper.bookie.storage.ldb;
 
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import org.apache.bookkeeper.bookie.storage.ldb.WriteCache;
+import org.junit.Assert;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static org.apache.bookkeeper.bookie.Util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -58,6 +57,13 @@ public class WriteCacheTest {
             assertEquals(0, writeCache.count());
             assertEquals(0, writeCache.getCacheOffset());
             assertEquals(expectedSegmentCount, writeCache.getSegmentsCount());
+
+            // Dopo report PIT  ------------------------------------
+            Assert.assertTrue("Expected > 0", writeCache.getMaxSegmentSize() > 0);
+            Assert.assertEquals("Expected segmentOffsetMask check failed",maxSegmentSize-1, writeCache.getSegmentOffsetMask());
+            Assert.assertEquals("Expected segmentOffsetBits check failed",63 - Long.numberOfLeadingZeros(maxSegmentSize), writeCache.getSegmentOffsetBits());
+            Assert.assertEquals(maxCacheSize%maxSegmentSize, writeCache.getCacheSegmentCapacity(expectedSegmentCount-1));
+            Assert.assertEquals(expectedSegmentCount, writeCache.getCacheSegmentsLength());
 
         }
     }
