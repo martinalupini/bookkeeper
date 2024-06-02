@@ -26,7 +26,7 @@ public class WriteCacheTest {
                 //Arguments.of(UnpooledByteBufAllocator.DEFAULT, 0, 1, Exception.class), // --> FAILURE: no exception thrown
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 0, 0, Exception.class), // --> PASS
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, -1, Exception.class), // --> PASS
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 2048, Exception.class), // --> FAILURE: no exception thrown
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 2048, null), // --> PASS
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 1024, null), // --> PASS
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 1023, Exception.class), // --> PASS
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 512, null), // --> PASS
@@ -50,7 +50,6 @@ public class WriteCacheTest {
 
             WriteCache writeCache = new WriteCache(allocator, maxCacheSize, maxSegmentSize);
 
-            //rivedi
             int expectedSegmentCount = (int)(1+(maxCacheSize/maxSegmentSize));
 
             assertEquals(maxCacheSize, writeCache.getMaxCacheSize());

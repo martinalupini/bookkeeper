@@ -78,7 +78,7 @@ public class Util {
 
     public static ByteBuf getInvalidByteBuf(){
         ByteBuf buf = mock(ByteBuf.class);
-        when(buf.readableBytes()).thenReturn(1);
+        when(buf.readableBytes()).thenReturn(2);
         when(buf.readerIndex()).thenReturn(-1);
         return buf;
     }
