@@ -12,18 +12,17 @@ import org.apache.bookkeeper.stats.StatsLogger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 
-// methods addEntry and put
+/**
+ *  Test di integrazione tra le classi {@link DbLedgerStorage} e {@link WriteCache}. <br>
+ *  Metodi coinvolti: {@link DbLedgerStorage#addEntry(ByteBuf)} e {@link WriteCache#put(long, long, ByteBuf)}
+ */
 public class DbLedgerStorageWriteCacheIT {
 
     private DbLedgerStorage storage;
@@ -54,6 +53,7 @@ public class DbLedgerStorageWriteCacheIT {
                         statsLogger, allocator, writeCacheSize, readCacheSize, readAheadCacheBatchSize,
                         readAheadCacheBatchBytesSize);
 
+                // In questo modo è possibile tenere traccia delle interazioni di write cache
                 spyWriteCache = spy(this.writeCache);
                 this.writeCache = spyWriteCache;
             }
@@ -77,6 +77,7 @@ public class DbLedgerStorageWriteCacheIT {
         conf.setLedgerDirNames(new String[] { tmpDir.toString() });
         Bookie bookie = new TestBookieImpl(conf);
 
+        // Otteniamo il riferimento all'istanza di DbLedgerStorage
         storage = (DbLedgerStorage) bookie.getLedgerStorage();
     }
 
@@ -86,37 +87,101 @@ public class DbLedgerStorageWriteCacheIT {
         tmpDir.delete();
     }
 
+    public ByteBuf getBuf(long ledgerId, long entryId){
+        ByteBuf entry = Unpooled.buffer(10 * 1024 + 2 * 8);
+        entry.writeLong(ledgerId);
+        entry.writeLong(entryId);
+        entry.writeZero(10 * 1024);
+
+        return entry;
+    }
+
     @Test
-    public void writeCacheFull() throws Exception {
+    public void testReachability() {
 
-        // Add enough entries to fill the 1st write cache
-        for (int i = 0; i < 5; i++) {
-            ByteBuf entry = Unpooled.buffer(100 * 1024 + 2 * 8);
-            entry.writeLong(4); // ledger id
-            entry.writeLong(i); // entry id
-            entry.writeZero(100 * 1024);
+        try {
+
+            ByteBuf entry = getBuf(4, 0);
             storage.addEntry(entry);
+            verify(spyWriteCache, times(1)).put(4, 0, entry);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
 
-        verify(spyWriteCache, times(5)).put(anyLong(), anyLong(), any(ByteBuf.class));
+    @Test
+    public void testInteractionStub() {
 
-/*
-        for (int i = 0; i < 5; i++) {
-            ByteBuf entry = Unpooled.buffer(100 * 1024 + 2 * 8);
-            entry.writeLong(4); // ledger id
-            entry.writeLong(5 + i); // entry id
-            entry.writeZero(100 * 1024);
+        try{
+
+            // creo uno stub tramite spyWriteCache. Faccio in modo che put() ritorni sempre true
+            doReturn(true).when(spyWriteCache).put(anyLong(), anyLong(), any());
+            ByteBuf entry = getBuf(4, 0);
             storage.addEntry(entry);
+            verify(spyWriteCache, times(1)).put(4, 0, entry);
+
+            // ora modifico lo stub in modo che put() ritorni false alla prima invocazione e true alla seconda
+            doReturn(false, true).when(spyWriteCache).put(anyLong(), anyLong(), any());
+            entry = getBuf(4, 1);
+            storage.addEntry(entry);
+            verify(spyWriteCache, times(2)).put(4, 1, entry);
+
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
         }
-
-        // Next add should fail for cache full
-        ByteBuf entry = Unpooled.buffer(100 * 1024 + 2 * 8);
-        entry.writeLong(4); // ledger id
-        entry.writeLong(22); // entry id
-        entry.writeZero(100 * 1024);
-
- */
-
 
     }
+
+    @Test
+    public void testInteractionEmptyCache(){
+
+        try{
+
+            // creo uno stub tramite spyWriteCache. Faccio in modo che put() ritorni sempre true
+            ByteBuf entry = getBuf(4, 0);
+            storage.addEntry(entry);
+            verify(spyWriteCache, times(1)).put(4, 0, entry);
+
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    public void testInteractionFullCache() {
+
+        try{
+            ByteBuf entry;
+
+            // Aggiungiamo entries per riempire la cache
+            for (int i = 0; i < 5; i++) {
+                entry = Unpooled.buffer(100 * 1024 + 2 * 8);
+                entry.writeLong(4); // ledger id
+                entry.writeLong(i); // entry id
+                entry.writeZero(100 * 1024);
+                storage.addEntry(entry);
+            }
+
+            entry = Unpooled.buffer(100 * 1024 + 2 * 8);
+            entry.writeLong(4); // ledger id
+            entry.writeLong(5); // entry id
+            entry.writeZero(100 * 1024);
+            storage.addEntry(entry);
+
+
+            // conto solo il numero di volte in cui viene invocata la put della entry con ledgerId 4 e entryId5
+            verify(spyWriteCache, atLeast(2)).put(4, 5, entry);
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+
 }
