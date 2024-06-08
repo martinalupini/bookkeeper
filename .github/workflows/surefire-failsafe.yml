@@ -1,4 +1,4 @@
-name: Integration-Test
+name: Surefire-Failsafe
 on:
   push:
     branches:
@@ -28,9 +28,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         run: mvn clean verify
-      - name: Upload report
+      - name: Upload report Failsafe
         uses: actions/upload-artifact@v4
         with:
           name: Failsafe_Report
           path: bookkeeper-server/target/failsafe-reports
+          if-no-files-found: error
+      - name: Upload report Surefire
+        uses: actions/upload-artifact@v4
+        with:
+          name: Surefire_Report
+          path: bookkeeper-server/target/surefire-reports
           if-no-files-found: error
