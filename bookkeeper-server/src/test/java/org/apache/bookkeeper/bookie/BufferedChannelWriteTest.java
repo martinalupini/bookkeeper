@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.buffer.UnpooledByteBufAllocator;
+import org.apache.bookkeeper.bookie.storage.ldb.WriteCache;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,7 +25,10 @@ import static org.mockito.Mockito.when;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// Indica che una singola istanza della classe di test verrà utilizzata per tutti i metodi di test
+/**
+ * Test di unità per la classe {@link BufferedChannel}. <br>
+ * Metodo testato: {@link BufferedChannel#write(ByteBuf)}
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BufferedChannelWriteTest {
 

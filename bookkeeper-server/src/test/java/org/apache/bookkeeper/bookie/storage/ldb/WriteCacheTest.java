@@ -1,5 +1,6 @@
 package org.apache.bookkeeper.bookie.storage.ldb;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import org.junit.Assert;
@@ -12,6 +13,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test di unità per la classe {@link WriteCache}. <br>
+ * Metodo testato: costruttore
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WriteCacheTest {
 

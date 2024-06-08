@@ -16,6 +16,10 @@ import java.util.stream.Stream;
 import static org.apache.bookkeeper.bookie.Util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test di unità per la classe {@link WriteCache}. <br>
+ * Metodo testato: {@link WriteCache#put(long, long, ByteBuf)}
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WriteCachePutTest {
 

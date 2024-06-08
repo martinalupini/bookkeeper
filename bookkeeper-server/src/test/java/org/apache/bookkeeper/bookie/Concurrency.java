@@ -3,7 +3,6 @@ package org.apache.bookkeeper.bookie;
 import io.netty.buffer.ByteBuf;
 import org.apache.bookkeeper.bookie.storage.ldb.WriteCache;
 
-import static org.apache.bookkeeper.bookie.Util.getWrittenByteBuf;
 
 public class Concurrency implements Runnable {
 

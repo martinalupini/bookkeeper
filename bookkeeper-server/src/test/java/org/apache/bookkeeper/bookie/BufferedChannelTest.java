@@ -1,5 +1,6 @@
 package org.apache.bookkeeper.bookie;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import org.junit.jupiter.api.*;
@@ -16,7 +17,10 @@ import static org.apache.bookkeeper.bookie.Util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-// Indica che una singola istanza della classe di test verrà utilizzata per tutti i metodi di test
+/**
+ * Test di unità per la classe {@link BufferedChannel}. <br>
+ * Metodo testato: costruttore
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BufferedChannelTest {
 
