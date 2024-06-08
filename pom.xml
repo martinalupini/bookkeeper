@@ -225,6 +225,8 @@
     <otel.version>1.26.0</otel.version>
     <UBUNTU_MIRROR>http://archive.ubuntu.com/ubuntu/</UBUNTU_MIRROR>
     <UBUNTU_SECURITY_MIRROR>http://security.ubuntu.com/ubuntu/</UBUNTU_SECURITY_MIRROR>
+    <!-- added maven surefire version isw2 -->
+    <maven-failsafe-plugin.version>3.0.0-M6</maven-failsafe-plugin.version>
   </properties>
 
   <!-- dependency definitions -->
