@@ -46,7 +46,6 @@ public class BufferedChannelTest {
                     Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile",null),   // --> PASS
                     //Arguments.of(Util.getInvalidAllocator(), Util.validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", Exception.class)  // --> FAIL: Exception not thrown
                     Arguments.of(getInvalidAllocator(), validFileChannel("validTestFile"), 1, 1, 0, "validTestFile",null),
-                    // Aggiunta dopo report PIT
                     Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 4096, 1, 1024, "writteTestFile", null)
             );
         } catch (IOException e) {
@@ -76,7 +75,7 @@ public class BufferedChannelTest {
                 assertEquals(writeCapacity, bufferedChannel.getWriteCapacity());
                 assertEquals(readCapacity, bufferedChannel.getReadCapacity());
                 assertEquals(unpersistedBytesBound, bufferedChannel.getUnpersistedBytesBound());
-                assertEquals(fc.position(), bufferedChannel.getFileChannelPosition());
+                assertEquals(fc.position(), bufferedChannel.position());
                 assertEquals(Long.MIN_VALUE, bufferedChannel.getReadBufferStartPosition());
                 assertEquals(0, bufferedChannel.getUnpersistedBytes());
                 if(unpersistedBytesBound > 0) {
@@ -85,7 +84,7 @@ public class BufferedChannelTest {
                     assertFalse(bufferedChannel.isDoRegularFlushes());
                 }
                 assertFalse(bufferedChannel.isClosed());
-                assertEquals(bufferedChannel.getFileChannelPosition(), bufferedChannel.position());
+                assertEquals(bufferedChannel.position(), bufferedChannel.getFileChannelPosition());
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
