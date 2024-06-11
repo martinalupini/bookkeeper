@@ -84,6 +84,12 @@ public class Util {
         return byteBuf;
     }
 
+    public static ByteBuf getEmptyByteBuf() {
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer(256);
+
+        return byteBuf;
+    }
+
     public static ByteBuf getInvalidByteBuf(){
         ByteBuf buf = mock(ByteBuf.class);
         when(buf.readableBytes()).thenReturn(2);

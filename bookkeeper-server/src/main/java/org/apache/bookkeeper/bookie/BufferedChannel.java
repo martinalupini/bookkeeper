@@ -298,7 +298,7 @@ public class BufferedChannel extends BufferedReadChannel implements Closeable {
     }
 
 
-    //method added for testing purposes
+    //methods added for testing purposes
     @VisibleForTesting
     boolean isClosed(){
         return closed;

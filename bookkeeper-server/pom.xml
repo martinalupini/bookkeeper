@@ -505,6 +505,7 @@
               <targetTests>
                 <param>org.apache.bookkeeper.bookie.BufferedChannelTest</param>
                 <param>org.apache.bookkeeper.bookie.BufferedChannelWriteTest</param>
+                <param>org.apache.bookkeeper.bookie.BufferedChannelReadTest</param>
                 <!--param>org.apache.bookkeeper.bookie.storage.ldb.WriteCacheTest</param>
                 <param>org.apache.bookkeeper.bookie.storage.ldb.WriteCachePutTest</param-->
               </targetTests>
