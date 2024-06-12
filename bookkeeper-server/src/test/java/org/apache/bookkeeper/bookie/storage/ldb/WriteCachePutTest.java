@@ -50,13 +50,16 @@ public class WriteCachePutTest {
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 1024, 0, 0, getWrittenByteBuf(), true,null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 512, 0, 0, getWrittenByteBuf(), true, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1, 1, 0, 0, getWrittenByteBuf(), false, null),
+
                 // Dopo report Jacoco -------------------------------------------------------
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 4, 0, 0, getWrittenByteBuf(), false, null),
                 // Dopo report PIT
+
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 64, 4, 0, 0, getWrittenByteBuf(), false, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 51, 4, 0, 0, getWrittenByteBuf(), false, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 64, 0, 0, getByteBuf("12345678123456781234567812345678123456781234567812345678123456789"), false, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 4, 0, 0, getByteBuf("1234567"), false, null),
+
 
 
                 // entry non valida
@@ -121,6 +124,7 @@ public class WriteCachePutTest {
             Assert.assertEquals("Expected cacheCount check failed",expectedCacheCount, writeCache.count());
         }
     }
+
 
     @Test
     void testConcurrencyPut() throws InterruptedException {
