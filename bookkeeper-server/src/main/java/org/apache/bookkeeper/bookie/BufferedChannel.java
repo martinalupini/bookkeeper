@@ -333,4 +333,9 @@ public class BufferedChannel extends BufferedReadChannel implements Closeable {
     public ByteBuf getWriteBuffer(){
         return writeBuffer;
     }
+
+    @VisibleForTesting
+    public void setReadBufferStartPosition(long readBufferStartPosition) {
+        this.readBufferStartPosition = readBufferStartPosition;
+    }
 }

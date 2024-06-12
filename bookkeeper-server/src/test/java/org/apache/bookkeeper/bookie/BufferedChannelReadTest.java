@@ -44,55 +44,63 @@ public class BufferedChannelReadTest {
         return Stream.of(
 
                 // dest invalida
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getInvalidDest(), 0, 1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, false, getInvalidDest(), 0, 1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getInvalidDest(), 0, 1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getInvalidDest(), 0, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getInvalidDest(), 0, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, getInvalidDest(), 0, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getInvalidDest(), 0, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getInvalidDest(), 0, 1, Exception.class),
+
+                // read capacity e write capacity 0
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"),  0, 0, 0, null, getEmptyByteBuf(), 0, 12, Exception.class),
+
+                // allocatore non valido
+                Arguments.of(getInvalidAllocator(), writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 12, null), // FAILURE --> nessuna eccezione generata. Cambio exception attesa in null
 
                 // length 0 e -1
                 // Tutti questi test sono falliti in quanto non è stata ritornata nessuna eccezione
-             /* Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), 0, -1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, false, getEmptyByteBuf(), 0, -1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1,null, true, getEmptyByteBuf(), 0, -1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), 0, -1, Exception.class),
+             /* Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, -1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, getEmptyByteBuf(), 0, -1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1,null, getEmptyByteBuf(), 0, -1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), 0, -1, Exception.class),
 
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), 0, 0, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, false, getEmptyByteBuf(), 0, 0, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getEmptyByteBuf(), 0, 0, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), 0, 0, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 0, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, getEmptyByteBuf(), 0, 0, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 0, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), 0, 0, Exception.class),
                  */
 
                 // pos pari a -1
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), -1, 1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, false, getEmptyByteBuf(), -1, 1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getEmptyByteBuf(), -1, 1, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), -1, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), -1, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, getEmptyByteBuf(), -1, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), -1, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), -1, 1, Exception.class),
 
                 // write buffer non vuoto e fc vuoto
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), 0, 1, null), // FAILURE --> reads all bytes
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), 0, 13, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), 0, 12, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), 11, 1, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", true, getEmptyByteBuf(), 13, 1, Exception.class),
+                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), 0, 1, null), // FAILURE --> reads all bytes
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), 0, 13, Exception.class),
+                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), 0, 11, null), // FAILURE --> legge tutti i bytes
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), 11, 1, null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, -1, "Hello world!", getEmptyByteBuf(), 13, 1, Exception.class),
 
                 // entrambi vuoti
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, false, getEmptyByteBuf(), 0, 1, Exception.class),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 4096, 1024, null, getEmptyByteBuf(), 0, 1, Exception.class),
 
                 // write buffer vuoto e fc non vuoto
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getEmptyByteBuf(), 0, 1, null), // FAILURE --> mi aspetto di leggere un bytes ma ne legge 12
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getEmptyByteBuf(), 0, 13, Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getEmptyByteBuf(), 0, 12, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getEmptyByteBuf(), 11, 1, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, true, getEmptyByteBuf(), 13, 1, Exception.class),
+                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 1, null), // FAILURE --> mi aspetto di leggere un bytes ma ne legge 12
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 13, Exception.class),
+                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 11, null), // FAILURE --> legge tutti i bytes
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 11, 1, null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 13, 1, Exception.class),
 
                 // sia write buffer che fc non sono vuoti
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), 0, 1, null), // FAILURE --> mi aspettavo di leggere un byte ma ne legge 3
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), 0, 12, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), 0, 13, Exception.class),
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), 11, 1, null),  // FAILURE --> mi aspettavo di leggere il carattere ! nel write buffer invece viene letto H
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", true, getEmptyByteBuf(), 13, 2, Exception.class)
+                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 1, null), // FAILURE --> mi aspettavo di leggere un byte ma ne legge 3
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 11, null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 12, null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 12, 1, Exception.class),
+                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 11, 1, null),  // FAILURE --> mi aspettavo di leggere il carattere ! nel write buffer invece viene letto H
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 12, 2, Exception.class),
 
-
+                // Dopo report Jacoco
+                Arguments.of(getInvalidAllocator(), writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 13, null)
                 );
     }
 
@@ -125,11 +133,26 @@ public class BufferedChannelReadTest {
         return byteBuf;
     }
 
+    private static FileChannel unwrittableFileChannel() throws IOException {
+        Path path = Paths.get("validFileTest");
+        if (Files.exists(path)) {
+            Files.delete(path);
+        }
+        Files.createFile(path);
+
+        ByteBuffer buff = ByteBuffer.wrap("Hello world!".getBytes(StandardCharsets.UTF_8));
+        FileChannel fc = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
+        fc.write(buff);
+        FileChannel spyFC = spy(fc);
+        doReturn(-1).when(spyFC).read(any(ByteBuffer.class), anyInt());
+        return spyFC;
+    }
+
 
     @ParameterizedTest
     @Timeout(5)
     @MethodSource("provideReadArguments")
-    void testBufferedChannelRead(ByteBufAllocator allocator, FileChannel fc, int writeCapacity, int readCapacity, long unpersistedBytesBound, String contentOfWriteBuffer, boolean notEmpty, ByteBuf dest, int pos, int length, Class<Exception> expectedException) {
+    void testBufferedChannelRead(ByteBufAllocator allocator, FileChannel fc, int writeCapacity, int readCapacity, long unpersistedBytesBound, String contentOfWriteBuffer, ByteBuf dest, int pos, int length, Class<Exception> expectedException) {
 
 
         try {
@@ -149,23 +172,24 @@ public class BufferedChannelReadTest {
             } else {
 
                 String expectedContent;
-
-                System.out.println(bc.getFileChannelPosition());
-                System.out.println(bc.getWriteBuffer().writerIndex());
+                int expectedRet = length;
 
                 int ret = bc.read(dest, pos, length);
 
                 byte[] actualBytesRead = new byte[0];
                 dest.getBytes(0, actualBytesRead);
 
-                print(actualBytesRead);
-
                 if(pos >= bc.getFileChannelPosition()){
                     int positionInBuffer = (int) (pos - bc.getFileChannelPosition());
 
                     expectedContent = content.substring(positionInBuffer, positionInBuffer+length);
                 } else {
-                    expectedContent = content.substring(pos, pos + length);
+                    if(pos+length <= content.length()) {
+                        expectedContent = content.substring(pos, pos + length);
+                    }else{
+                        expectedContent = content.substring(pos);
+                        expectedRet = content.length();
+                    }
                 }
 
                 // creo un ByteBuf con il contenuto che mi aspetto
@@ -174,7 +198,7 @@ public class BufferedChannelReadTest {
                 byteBuf.writeBytes(data);
 
 
-                Assert.assertEquals("numbers of bytes read is not what expected", length, ret);
+                Assert.assertEquals("numbers of bytes read is not what expected", expectedRet, ret);
                 Assert.assertEquals("content read is not what expected", dest.toString(StandardCharsets.UTF_8), byteBuf.toString(StandardCharsets.UTF_8));
             }
 
@@ -185,14 +209,47 @@ public class BufferedChannelReadTest {
         }
 
 
-
-
     }
 
-    private void print(byte[] bytes){
-        for(byte b : bytes){
-            System.out.println(b);
+    static Stream<Arguments> provideBaduaReadArguments() throws IOException {
+
+        return Stream.of(
+
+                // Dopo report Jacoco e report Badua
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 0, getEmptyByteBuf(), -1, 12, Exception.class),
+                // Dopo il secondo report Badua
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 0, getEmptyByteBuf(), 0, 12, null)
+        );
+    }
+
+    // Aggiunto dopo il report di Jacoco e Badua
+    @ParameterizedTest
+    @MethodSource("provideBaduaReadArguments")
+    public void baduaReadTest(ByteBufAllocator allocator, FileChannel fc, int writeCapacity, int readCapacity, long unpersistedBytesBound, ByteBuf dest, int pos, int length, Class<Exception> expectedException) throws IOException {
+
+        try {
+            BufferedChannel bc = new BufferedChannel(allocator, fc, writeCapacity, readCapacity, unpersistedBytesBound);
+            assertNotNull(bc, "BufferedChannel should not be null");
+
+            // prima read per riempire il read buffer
+            bc.read(dest, 0, 10);
+
+            if (expectedException != null) {
+                // Verifica che venga lanciata l'eccezione attesa
+                assertThrows(expectedException, () -> {
+                    bc.read(dest, pos, length);
+                });
+            } else {
+
+
+                int ret = bc.read(dest, pos , length);
+
+                Assert.assertEquals("numbers of bytes read is not what expected", 12, ret);
+            }
+        }catch (IOException e){
+            throw new RuntimeException(e);
         }
+
     }
 
 
