@@ -73,10 +73,10 @@ public class BufferedChannelWriteTest {
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 1, 1024, "validTestFile", getWrittenByteBuf(), "Hello, world!", null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, validFileChannel("validTestFile"), 4096, 1, 4097, "validTestFile", getWrittenByteBuf(), "Hello, world!",  null),
                 Arguments.of(getInvalidAllocator(), validFileChannel("validTestFile"), 1, 1, 0, "validTestFile", getWrittenByteBuf(), "Hello, world!", Exception.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 4096, 1, 1024, "writtenTestFile", getWrittenByteBuf(), "Hello, world!", null)
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 4096, 1, 1024, "writtenTestFile", getWrittenByteBuf(), "Hello, world!", null),
                 // Aggiunta dopo report PIT ----------------------------------------------------------------
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 3, 1, -1, "writtenTestFile", getWrittenByteBuf(), "Hello, world!", null),
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 4096, 1, 13, "writtenTestFile", getWrittenByteBuf(), "Hello, world!", null)
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 3, 1, -1, "writtenTestFile", getWrittenByteBuf(), "Hello, world!", null),
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("writtenTestFile"), 4096, 1, 13, "writtenTestFile", getWrittenByteBuf(), "Hello, world!", null)
         );
     }
 

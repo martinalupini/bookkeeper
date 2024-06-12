@@ -218,7 +218,9 @@ public class BufferedChannelReadTest {
                 // Dopo report Jacoco e report Badua
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 0, getEmptyByteBuf(), -1, 12, Exception.class),
                 // Dopo il secondo report Badua
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 0, getEmptyByteBuf(), 0, 12, null)
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 0, getEmptyByteBuf(), 0, 12, null),
+                // Dopo report PIT
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world!"), 4096, 4096, 0, getEmptyByteBuf(), 1, 10, null)
         );
     }
 
@@ -244,7 +246,7 @@ public class BufferedChannelReadTest {
 
                 int ret = bc.read(dest, pos , length);
 
-                Assert.assertEquals("numbers of bytes read is not what expected", 12, ret);
+                Assert.assertEquals("numbers of bytes read is not what expected", length+pos, ret);
             }
         }catch (IOException e){
             throw new RuntimeException(e);
