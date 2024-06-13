@@ -69,8 +69,6 @@ public class WriteCacheTest {
             Assert.assertEquals(maxCacheSize%maxSegmentSize, writeCache.getCacheSegmentCapacity(expectedSegmentCount-1));
             Assert.assertEquals(expectedSegmentCount, writeCache.getCacheSegmentsLength());
 
-
-
         }
     }
 

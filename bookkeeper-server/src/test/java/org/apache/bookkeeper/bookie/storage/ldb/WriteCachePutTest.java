@@ -51,17 +51,6 @@ public class WriteCachePutTest {
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 512, 0, 0, getWrittenByteBuf(), true, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1, 1, 0, 0, getWrittenByteBuf(), false, null),
 
-                // Dopo report Jacoco -------------------------------------------------------
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 4, 0, 0, getWrittenByteBuf(), false, null),
-                // Dopo report PIT
-
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 64, 4, 0, 0, getWrittenByteBuf(), false, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 51, 4, 0, 0, getWrittenByteBuf(), false, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 64, 0, 0, getByteBuf("12345678123456781234567812345678123456781234567812345678123456789"), false, null),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 4, 0, 0, getByteBuf("1234567"), false, null),
-
-
-
                 // entry non valida
                 //Arguments.of(UnpooledByteBufAllocator.DEFAULT, 0, 1, 1, 1, getInvalidByteBuf(), false, Exception.class),  //--> FAILURE: no exception thrown
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 0, 1, 1, 1, getInvalidByteBuf(), false, null),
@@ -76,7 +65,17 @@ public class WriteCachePutTest {
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 2048, 1, 1, null, false, NullPointerException.class),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 1024, 1, 1, null, false, NullPointerException.class),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 512, 1, 1, null, false, NullPointerException.class),
-                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1, 1, 1, 1, null, false, NullPointerException.class)
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1, 1, 1, 1, null, false, NullPointerException.class),
+
+                // Dopo report Jacoco -------------------------------------------------------
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 1024, 4, 0, 0, getWrittenByteBuf(), false, null),
+
+
+                // Dopo report PIT
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 64, 128, 0, 0, getByteBuf("12345678123456781234567812345678123456781234567812345678123456789"), false, null), // mutazione da - a +
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 64, 128, 0, 0, getByteBuf("1234567812345678123456781234567812345678123456781234567812345678"), true, null), // mutazione da > a >=
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, 128, 64, 0, 0, getByteBuf("1234567812345678123456781234567812345678123456781234567812345678"), true, null) // mutazione da < a <=
+
 
         );
     }
@@ -124,6 +123,18 @@ public class WriteCachePutTest {
             Assert.assertEquals("Expected cacheCount check failed",expectedCacheCount, writeCache.count());
         }
     }
+
+    @Test
+    void mutationTest(){
+        WriteCache writeCache = new WriteCache(UnpooledByteBufAllocator.DEFAULT, 1024, 128);
+        writeCache.put(0, 0, getByteBuf("1"));
+
+        boolean res = writeCache.put(1, 1, getByteBuf("12345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567812345678123456781234567812345678"));
+
+        Assert.assertEquals("Expected result check failed", false, res);
+
+    }
+
 
 
     @Test
@@ -182,12 +193,6 @@ public class WriteCachePutTest {
 
     }
 
-
-    private static final int ALIGN_64_MASK = ~(64 - 1);
-
-    static int align64(int size) {
-        return (size + 64 - 1) & ALIGN_64_MASK;
-    }
 }
 
 
