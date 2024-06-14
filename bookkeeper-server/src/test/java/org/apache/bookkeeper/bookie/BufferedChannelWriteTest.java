@@ -207,12 +207,11 @@ public class BufferedChannelWriteTest {
 
 
                 // Dopo report PIT
-                /*
                 if(src.readableBytes() > cap){
                     verify(spyBC, atLeastOnce()).flush();
                 }
 
-                 */
+
 
             }
 

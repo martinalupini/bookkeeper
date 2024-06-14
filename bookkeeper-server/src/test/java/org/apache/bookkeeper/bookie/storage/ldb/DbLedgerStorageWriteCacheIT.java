@@ -139,11 +139,9 @@ public class DbLedgerStorageWriteCacheIT {
 
         try{
 
-            // creo uno stub tramite spyWriteCache. Faccio in modo che put() ritorni sempre true
             ByteBuf entry = getBuf(4, 0);
             storage.addEntry(entry);
             verify(spyWriteCache, times(1)).put(4, 0, entry);
-
 
         } catch (Exception e){
             throw new RuntimeException(e);
@@ -173,7 +171,7 @@ public class DbLedgerStorageWriteCacheIT {
             storage.addEntry(entry);
 
 
-            // conto solo il numero di volte in cui viene invocata la put della entry con ledgerId 4 e entryId5
+            // conto solo il numero di volte in cui viene invocata la put della entry con ledgerId 4 e entryId 5
             verify(spyWriteCache, atLeast(2)).put(4, 5, entry);
 
         } catch (Exception e){
