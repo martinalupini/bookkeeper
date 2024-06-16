@@ -96,11 +96,14 @@ public class BufferedChannelReadTest {
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 11, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 12, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 12, 1, Exception.class),
-                // *** Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 11, 1, null),  //FAILURE --> mi aspettavo di leggere il carattere ! nel write buffer invece viene letto H
+                Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 11, 1, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 12, 2, Exception.class),
 
                 // Dopo report Jacoco
-                Arguments.of(getInvalidAllocator(), writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 13, null)
+                Arguments.of(getInvalidAllocator(), writtenFileChannel("Hello world!"), 4096, 4096, 1, null, getEmptyByteBuf(), 0, 13, null),
+
+                // Dopo report Badua
+                Arguments.of(getInvalidAllocator(), validFileChannel("validTestFile"), 4096, 4096, 1, null, getEmptyByteBuf(), 1, 1, null)
                 );
     }
 
@@ -179,27 +182,26 @@ public class BufferedChannelReadTest {
                 byte[] actualBytesRead = new byte[0];
                 dest.getBytes(0, actualBytesRead);
 
-                if(pos >= bc.getFileChannelPosition()){
-                    int positionInBuffer = (int) (pos - bc.getFileChannelPosition());
-
-                    expectedContent = content.substring(positionInBuffer, positionInBuffer+length);
+                if(pos >= bc.getFileChannelPosition() || pos+length <= content.length()){
+                    expectedContent = content.substring(pos, pos+length);
                 } else {
-                    if(pos+length <= content.length()) {
-                        expectedContent = content.substring(pos, pos + length);
-                    }else{
-                        expectedContent = content.substring(pos);
-                        expectedRet = content.length();
-                    }
+                    expectedContent = content.substring(pos);
+                    expectedRet = content.length();
                 }
 
                 // creo un ByteBuf con il contenuto che mi aspetto
                 byte[] data = expectedContent.getBytes();
                 ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
                 byteBuf.writeBytes(data);
+                String expectedDest = byteBuf.toString(StandardCharsets.UTF_8);
 
+                if(bc.writeBuffer == null && bc.position == 0){
+                    expectedRet = 0;
+                    expectedDest = "";
+                }
 
                 Assert.assertEquals("numbers of bytes read is not what expected", expectedRet, ret);
-                Assert.assertEquals("content read is not what expected", dest.toString(StandardCharsets.UTF_8), byteBuf.toString(StandardCharsets.UTF_8));
+                Assert.assertEquals("content read is not what expected", expectedDest, dest.toString(StandardCharsets.UTF_8));
             }
 
 
