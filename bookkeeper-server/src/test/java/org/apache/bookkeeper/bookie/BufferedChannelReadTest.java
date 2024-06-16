@@ -96,7 +96,7 @@ public class BufferedChannelReadTest {
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 11, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 0, 12, null),
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 12, 1, Exception.class),
-                //Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 11, 1, null),  // FAILURE --> mi aspettavo di leggere il carattere ! nel write buffer invece viene letto H
+                // *** Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 11, 1, null),  //FAILURE --> mi aspettavo di leggere il carattere ! nel write buffer invece viene letto H
                 Arguments.of(UnpooledByteBufAllocator.DEFAULT, writtenFileChannel("Hello world"), 3, 3, -1, "!", getEmptyByteBuf(), 12, 2, Exception.class),
 
                 // Dopo report Jacoco
